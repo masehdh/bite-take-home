@@ -5,12 +5,27 @@ import Mod from "../models/Mod.js";
 import Discount from "../models/Discount.js";
 import OrderType from "../models/OrderType.js";
 import parseAndBulkWrite from "../utilities/parseAndBulkWrite.js";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const triggerSync = async (req, res) => {
-  const apiResponse = await axios.get(
-    "https://bite-test-pos-production.herokuapp.com/locations/1/menu"
-  );
+  let apiResponse;
+
+  try {
+    apiResponse = await axios.get(
+      "https://bite-test-pos-production.herokuapp.com/locations/1/menu"
+    );
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      const response = e.response?.data?.error;
+      const message = response ? JSON.stringify(response) : e.message;
+      console.error(`\n Error code: ${e.code} Message: ${message}`);
+    } else {
+      console.error(e);
+    }
+
+    res.status(500).send("Failed to pull data from API, please try again");
+    return;
+  }
 
   const { sections, items, modGroups, mods, discounts, orderTypes } =
     apiResponse.data;
@@ -27,7 +42,7 @@ const triggerSync = async (req, res) => {
 
   await parseAndBulkWrite(orderTypes, OrderType);
 
-  res.send();
+  res.sendStatus(200);
 };
 
 export default triggerSync;
