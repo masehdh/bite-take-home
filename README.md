@@ -12,7 +12,7 @@ Add a .env file in the root directory with
 
 ```
 MONGO_DB_URI=<your db string>
-API_KEY=<key I sent on wellfound>
+API_KEY=<any string you want, make sure to pass this as a bearer token in your post requests>
 ```
 
 ## Step 4
